@@ -3,13 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable, tap } from 'rxjs';
 
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-export interface LoginResponse {
-  token: string; // ajusta si tu API devuelve otro nombre
-}
+export interface LoginRequest { username: string; password: string; }
+export interface LoginResponse { access_token: string; token_type: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -20,21 +15,17 @@ export class AuthService {
   login(body: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.base}/login`, body).pipe(
       tap(resp => {
-        // guarda token — ajusta la propiedad si tu API devuelve otro nombre
-        localStorage.setItem('token', resp.token);
+        localStorage.setItem('token', resp.access_token);
+        localStorage.setItem('token_type', resp.token_type || 'Bearer');
       })
     );
   }
 
-  logout() {
-    localStorage.removeItem('token');
+  get token(): string | null { return localStorage.getItem('token'); }
+  get authHeader(): string | null {
+    const t = this.token; if (!t) return null;
+    const type = localStorage.getItem('token_type') || 'Bearer';
+    return `${type} ${t}`;
   }
-
-  getToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
-  isAuthenticated(): boolean {
-    return !!this.getToken();
-  }
+  logout() { localStorage.removeItem('token'); localStorage.removeItem('token_type'); }
 }
