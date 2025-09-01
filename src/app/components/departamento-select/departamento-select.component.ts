@@ -13,7 +13,7 @@ type Depto = { id: number; nombre: string };
 })
 export class DepartamentoSelectComponent {
   departamentos: Depto[] = [];
-  @Output() selected = new EventEmitter<number>(); // 👈 nombre distinto de "change"
+  @Output() selected = new EventEmitter<number>();
 
   constructor(private http: HttpClient) {}
 
@@ -31,6 +31,6 @@ export class DepartamentoSelectComponent {
 
   onSelect(e: Event) {
     const id = Number((e.target as HTMLSelectElement).value);
-    this.selected.emit(id); // 👈 emitimos el número
+    this.selected.emit(id);
   }
 }
