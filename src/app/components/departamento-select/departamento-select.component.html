@@ -1,7 +1,6 @@
 <select class="form-select" (change)="onSelect($event)">
-  <option selected disabled *ngIf="!loading">Seleccione un departamento...</option>
-  <option *ngIf="loading" disabled>Cargando…</option>
+  <option selected disabled>Seleccione un departamento...</option>
   <option *ngFor="let d of departamentos" [value]="d.id">{{ d.nombre }}</option>
 </select>
-<div *ngIf="error" class="text-danger small mt-1">{{ error }}</div>
+
 

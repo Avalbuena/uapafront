@@ -49,11 +49,8 @@
           <div class="d-flex flex-column flex-md-row gap-3 align-items-md-end">
             <div class="flex-fill">
               <label for="deptoSelect" class="form-label">Departamento</label>
-              <!-- <select id="deptoSelect" class="form-select">
-                <option selected disabled>Seleccione un departamento...</option>
-              </select> -->
               <ng-container *ngIf="isLoggedIn; else pidaLogin">
-                <app-departamento-select (change)="onDepartamentoChange($event)"></app-departamento-select>
+                <app-departamento-select (selected)="onDepartamentoChange($event)"></app-departamento-select>
               </ng-container>
               <ng-template #pidaLogin>
                 <select class="form-select" disabled>
@@ -61,12 +58,8 @@
                 </select>
               </ng-template>
             </div>
-            <!-- <div class="flex-fill">
-              <label for="searchInput" class="form-label">Buscar municipio</label>
-              <input id="searchInput" type="text" class="form-control" placeholder="Ej: medellín" />
-            </div> -->
             <div>
-              <button id="reloadBtn" type="button" class="btn btn-outline-secondary">
+              <button id="reloadBtn" type="button" class="btn btn-outline-secondary" (click)="buscar()">
                 <i class="bi bi-arrow-repeat me-1"></i> Buscar
               </button>
             </div>
@@ -75,7 +68,7 @@
           <!-- Resultado -->
           <div class="d-flex justify-content-between align-items-center mt-4">
             <h6 class="mb-0">Municipios</h6>
-            <span class="badge text-bg-secondary">Total: <span id="totalMunicipios">0</span></span>
+            <span class="badge text-bg-secondary">Total: <span id="totalMunicipios">{{ total }}</span></span>
           </div>
 
           <div class="table-responsive mt-2">
@@ -86,25 +79,53 @@
                   <th>Nombre</th>
                 </tr>
               </thead>
-              <tbody>
-                <!-- filas dinámicas -->
-                <tr class="text-secondary" id="emptyRow">
-                  <td colspan="2">Seleccione un departamento para ver sus municipios…</td>
+              <tbody *ngIf="rows.length; else emptyRows">
+                <tr *ngFor="let m of rows">
+                  <td>{{ m.codigo }}</td>
+                  <td>{{ m.nombre }}</td>
                 </tr>
               </tbody>
+              <ng-template #emptyRows>
+                <tbody *ngIf="rows.length; else emptyRows">
+                  <tr *ngFor="let m of rows">
+                    <td>{{ m.codigo }}</td>
+                    <td>{{ m.nombre }}</td>
+                  </tr>
+                </tbody>
+                <ng-template #emptyRows>
+                  <tbody>
+                    <tr class="text-secondary">
+                      <td colspan="2">
+                        <ng-container *ngIf="!selectedDeptoId">Seleccione un departamento para ver sus municipios…</ng-container>
+                        <ng-container *ngIf="selectedDeptoId && loadingMunicipios">Cargando municipios…</ng-container>
+                        <ng-container *ngIf="selectedDeptoId && !loadingMunicipios">Sin resultados.</ng-container>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ng-template>
+
+              </ng-template>
+
             </table>
           </div>
 
           <!-- Paginación -->
           <nav aria-label="Paginación" class="d-flex justify-content-between align-items-center">
             <div class="text-secondary small">
-              Página <span id="pageNum">1</span> de <span id="pageTotal">1</span>
+              Página <span id="pageNum">{{ page }}</span>
+              de <span id="pageTotal">{{ totalPages }}</span>
             </div>
             <ul class="pagination pagination-sm mb-0">
-              <li class="page-item disabled"><button id="prevPage" class="page-link">Anterior</button></li>
-              <li class="page-item"><button id="nextPage" class="page-link">Siguiente</button></li>
+              <li class="page-item" [class.disabled]="page === 1">
+                <button id="prevPage" class="page-link" (click)="prevPage()">Anterior</button>
+              </li>
+              <li class="page-item" [class.disabled]="page * pageSize >= total">
+                <button id="nextPage" class="page-link" (click)="nextPage()">Siguiente</button>
+              </li>
             </ul>
           </nav>
+
+
         </div>
       </div>
     </section>
